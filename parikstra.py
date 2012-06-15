@@ -111,6 +111,15 @@ class Point(object):
             **kwargs
         )
 
+    def from_(self, start, *kargs, **kwargs):
+        return Itinerary(
+            start = start,
+            end = self,
+
+            *kargs,
+            **kwargs
+        )
+
 class Itinerary(object):
     TRANSPORTS = (
         "train",
