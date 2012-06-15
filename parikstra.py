@@ -433,6 +433,68 @@ class API(object):
 
         return ret
 
+class News(object):
+    def __init__(self, o):
+        super(News, self).__init__()
+
+        for k, v in o.iteritems():
+            setattr(self, k, v)
+
+    @classmethod
+    def get(cls):
+        req = API._rest_req("/fr/actualites-trafic/")
+        req = req.text
+
+        req = bs4.BeautifulSoup(req)
+        req = req.find_all("div", attrs = {"class": "infosTrafic"})
+        req = req[1:]
+
+        ret = []
+        for news in req:
+            title = news.find("h1").text
+
+            news = news.find("table")
+            for n in news.find_all("tr", recursive = False):
+                n = n.find_all("td", recursive = False)
+
+                type = n[0].find("img")["alt"]
+
+                line = n[0].find_all("img")[1:]
+                line = [i["alt"] for i in line]
+
+                if not line:
+                    line = None
+                
+                date = n[1].text
+                date = datetime.datetime.strptime(date, "%d/%m/%Y %H:%M")
+
+                title = n[2].find("a")["title"]
+
+                detail_url = n[3].find("a")["href"]
+                detail_url = "/" + detail_url
+
+                self = News({
+                    "title": title,
+                    "type": type,
+                    "line": line,
+                    "date": date,
+                    "detail_url": detail_url,
+                })
+
+                ret.append(self)
+
+        if 0:
+            import code
+            code.InteractiveConsole({
+                "r" : req,
+            }).interact(">>> ")
+
+        return ret
+
+    def __repr__(self):
+        return "<News %s %r (%s)>" % (self.type.capitalize(), self.title, self.date, )
+
+    # XXX TODO get details
 
 def main():
     import optparse
