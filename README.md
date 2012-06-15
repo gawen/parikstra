@@ -35,11 +35,9 @@ Let's say you take the first one
 
 Request the itinerary's steps ...
 
-    steps = itinerary.steps
+Iterate the different steps of the journey
 
-... and iterate them
-
-    for i, step in enumerate(steps):
+    for i, step in enumerate(itinerary):
         print "#%d. %s => %s @ %s" % (i + 1, step.name, step.direction, step.time, )
 
 Here you go.
