@@ -6,6 +6,8 @@ It uses official API of Parisian transport websites, but is still an unofficial 
 
 It is at the moment in developpement. Use at your own risk.
 
+By the way, `parikstra` = Paris + [Djikstra](http://en.wikipedia.org/wiki/Dijkstra's_algorithm)
+
 ## Usage
 
 Import the `parikstra` module
