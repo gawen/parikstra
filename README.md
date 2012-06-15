@@ -10,6 +10,14 @@ By the way, `parikstra` = Paris + [Djikstra](http://en.wikipedia.org/wiki/Dijkst
 
 ## Usage
 
+Install `parikstra`, either cloning this repository
+
+    git clone git://github.com/Gawen/parikstra.git
+
+or using `pip` (or other)
+
+    pip install parikstra
+
 Import the `parikstra` module
     
     import parikstra
