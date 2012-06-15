@@ -317,16 +317,19 @@ class Itinerary(object):
 
                 if detail_table:
                     line = detail_table.find("td")
-                    line = [i["alt"] for i in line.find_all("img", recursive = False)]
+                    line1 = [i["alt"] for i in line.find_all("img", recursive = False)]
+                    line2 = [i.text.strip() for i in line.find_all("div")]
+                    line = line1 + line2
                     
-                    line_detail = detail_table.find("p")
+                    line_detail = detail_table.find_all("td")[1]
+                    line_detail = line_detail.find("p")
                     line_detail = line_detail.text.strip()
-                    line_detail = line_detail.split("\n", 1)
+                    line_detail = line_detail.split("\n")
 
-                    line_info = line_detail[0].strip()
+                    line_info = " ".join([i.strip() for i in line_detail[:-1]])
                     
-                    if line_detail[1].strip().startswith("Direction"):
-                        direction = line_detail[1].strip()[len("Direction"):].strip()
+                    if line_detail[-1].strip().startswith("Direction"):
+                        direction = line_detail[-1].strip()[len("Direction"):].strip()
 
                 else:
                     alts = ("Marche", "Attente", )
