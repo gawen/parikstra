@@ -534,30 +534,30 @@ def main():
     for i, step in enumerate(itinerary):
         print "%d." % (i + 1),
         
-        if step.type != "step":
-            print "%s:" % (step.type.capitalize(), ),
-        
-        print "%s," % (step.name, ),
+        if step.type == "departure":
+            print "At %s, from %s" % (step.time, step.name, )
+
+        elif step.type == "arrival":
+            print "Here you go: %s" % (step.name, )
+            continue
+
+        else:
+            print "At %s (%s)" % (step.name, step.time, )
 
         if isinstance(step, WalkStep):
             if step.walk_duration:
-                print "walking for %s," % (step.walk_duration, ),
+                print "Walk to %s for %s" % ("%s (%s)" % (step.next._line_info, step.next.name, ) if step.next._line_info else step.next.name, step.walk_duration, )
 
             if step.wait_duration:
-                print "waiting for %s," % (step.wait_duration, ),
-
+                print "Wait for %s" % (step.wait_duration, )
 
         else:
-            if step.direction:
-                print "direction %s," % (step.direction, ),
+            print "Take %s, direction %s" % (step._line_info, step.direction, )
 
-            if step._line_info:
-                print "with %s," % (step._line_info, ),
+            if step.next:
+                print "Stop at %s" % (step.next.name, )
 
-        print "at %s" % (step.time, )
-
-        if step.type == "arrival":
-            continue
+        print
 
 if __name__ == "__main__":
     main()
