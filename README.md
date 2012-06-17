@@ -69,31 +69,23 @@ You can use `parikstra` as a CLI client.
 Example:
 
     $ python parikstra.py --departure "nation" --arrival "aeroport charles de gaule"
-    *** Itinerary #1 (2012-06-15 17:30:00 => 2012-06-15 18:11:00)
-     - Type: Trajet arriv?e au plus t?t
-     - Duration: 0:41:00
+    *** Itinerary #1 (2012-06-17 15:41:00 => 2012-06-17 16:35:00)
+     - Type: Trajet arrivée au plus tôt
+     - Duration: 0:54:00
      - Zones: [1, 5]
 
-    *** Itinerary #2 (2012-06-15 17:33:00 => 2012-06-15 18:58:00)
+    *** Itinerary #2 (2012-06-17 15:58:00 => 2012-06-17 17:09:00)
      - Type: Trajet le moins de correspondances
-     - Duration: 1:25:00
+     - Duration: 1:11:00
      - Zones: [1, 5]
 
     Which one (1-2) ? 1
     ********************************************************************************
-    Itinerary Trajet arriv?e au plus t?t
-    *** Steps
-    1. Departure: NATION, Paris => GARE DE CERGY LE HAUT @ 17:30
-     - Line: RER A - UXOL
-
-    2. CHATELET LES HALLES, Paris => CHATELET LES HALLES, Paris @ 17:35
-     - Walk duration: 0:02:00
-     - Wait duration: 0:04:00
-
-    3. CHATELET LES HALLES, Paris => CDG Terminal 2 / TGV @ 17:41
-     - Line: RER B - EMOI
-
-    4. Arrival: AEROPORT CDG 1, Tremblay-en-France => AEROPORT CDG 1, Tremblay-en-France @ 18:11
+    *** Itinerary Trajet arrivée au plus tôt
+    1. Departure: NATION, Paris, direction GARE DE POISSY, with RER A - TERI, at 15:41
+    2. CHATELET LES HALLES, Paris, walking for 0:02:00, waiting for 0:08:00, at 15:46
+    3. CHATELET LES HALLES, Paris, direction CDG Terminal 2 / TGV, with RER B - EKLI, at 15:56
+    4. Arrival: AEROPORT CDG 1, Tremblay-en-France, at 16:35
 
 ## Work in progress
 

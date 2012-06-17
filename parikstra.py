@@ -351,7 +351,7 @@ class Itinerary(object):
                     walk_duration = durations.get("Marche", None)
                     wait_duration = durations.get("Attente", None)
 
-            step = Step(
+            step = Step.build(
                 time = hour,
                 type = step_type,
                 name = step_name,
@@ -364,8 +364,36 @@ class Itinerary(object):
 
             steps.append(step)
 
-        return Steps(steps)
+        # Set previous and next step
 
+        def iterate_step():
+            previous = None
+            next = None
+            it = iter(steps)
+
+            try:
+                step = it.next()
+
+            except StopIteration:
+                step = None
+
+            while step:
+                try:
+                    next = it.next()
+
+                except StopIteration:
+                    next = None
+
+                yield (previous, step, next)
+
+                previous = step
+                step = next
+
+        for previous, step, next in iterate_step():
+            step.previous = previous
+            step.next = next
+
+        return Steps(steps)
 
     def __repr__(self):
         return "<Itinerary %r (%s)>" % (self.type, self.duration, )
@@ -375,11 +403,21 @@ class Steps(list):
         super(Steps, self).__init__(steps)
 
 class Step(object):
-    def __init__(self, **kwargs):
-        super(Step, self).__init__()
+    @classmethod
+    def build(cls, **kwargs):
+        walk_step = kwargs.get("walk_duration", None) or kwargs.get("wait_duration", None)
+
+        step_cls = WalkStep if walk_step else TransportStep
+
+        self = step_cls()
+
+        self.previous = None
+        self.next = None
 
         for k, v in kwargs.iteritems():
             setattr(self, "_" + k, v)
+
+        return self
 
     @property
     def name(self):
@@ -393,14 +431,19 @@ class Step(object):
     def time(self):
         return self._time
 
+class TransportStep(Step):
     @property
     def line(self):
         return self._line
 
     @property
     def direction(self):
-        return self._direction or self._name
+        return self._direction
 
+    def __repr__(self):
+        return "<TransportStep %r direction %r @ %s>" % (self.name, self.direction, self.time, )
+
+class WalkStep(Step):
     @property
     def walk_duration(self):
         return self._walk_duration
@@ -410,7 +453,7 @@ class Step(object):
         return self._wait_duration
 
     def __repr__(self):
-        return "<%r => %r @ %s>" % (self.name, self.direction, self.time, )
+        return "<WalkStep in %r (walk: %s, wait: %s) @ %s>" % (self.name, self.walk_duration, self.wait_duration, self.time, )
 
 class API(object):
     verbose = False
@@ -486,28 +529,35 @@ def main():
             print
 
     print "*" * 80
-    print "Itinerary %s" % (itinerary.type, )
+    print "*** Itinerary %s" % (itinerary.type, )
 
-    print "*** Steps"
     for i, step in enumerate(itinerary):
         print "%d." % (i + 1),
         
         if step.type != "step":
             print "%s:" % (step.type.capitalize(), ),
+        
+        print "%s," % (step.name, ),
 
-        print "%s => %s @ %s" % (step.name, step.direction, step.time, )
+        if isinstance(step, WalkStep):
+            if step.walk_duration:
+                print "walking for %s," % (step.walk_duration, ),
+
+            if step.wait_duration:
+                print "waiting for %s," % (step.wait_duration, ),
+
+
+        else:
+            if step.direction:
+                print "direction %s," % (step.direction, ),
+
+            if step._line_info:
+                print "with %s," % (step._line_info, ),
+
+        print "at %s" % (step.time, )
 
         if step.type == "arrival":
             continue
-        
-        if step.walk_duration is not None or step.wait_duration is not None:
-            print " - Walk duration: %s" % (step.walk_duration, )
-            print " - Wait duration: %s" % (step.wait_duration, )
-
-        else:
-            print " - Line: %s" % (step._line_info, )
-
-        print
 
 if __name__ == "__main__":
     main()
