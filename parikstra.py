@@ -85,7 +85,7 @@ class Point(object):
         def iterate():
             for k in fields:
                 yield (k, getattr(self, k, ""))
-       
+
         ret = iterate()
 
         if prefix:
@@ -151,7 +151,7 @@ class Itinerary(object):
 
         date = date if date is not None else datetime_now_floor_5min()
         walk_speed = walk_speed if walk_speed is not None else "normal"
-        
+
         assert walk_speed in cls.WALK_SPEEDS
 
         if with_transport:
@@ -159,16 +159,16 @@ class Itinerary(object):
 
         else:
             transports = set(cls.TRANSPORTS)
-        
+
         if without_transport:
             for i in without_transport:
                 transports.remove(i)
-        
+
         for transport in transports:
             assert transport in cls.TRANSPORTS
 
         data = {}
-        
+
         data["id"] = ""
 
         # Points
@@ -190,7 +190,7 @@ class Itinerary(object):
 
         # Walk speed
         data["walk_speed"] = cls.WALK_SPEEDS[walk_speed]
-        
+
         # misc TODO
         data["sens"] = "1"
         data["moreCriterions"] = "false"
@@ -210,7 +210,7 @@ class Itinerary(object):
         # BS Parse
         req = bs4.BeautifulSoup(req)
         req = req.find(id = "itinerariesResult")
- 
+
         for result in req.find_all("table"):
             self = super(Itinerary, cls).__new__(cls)
 
@@ -221,7 +221,7 @@ class Itinerary(object):
             dep_arr = result.find("tr", attrs = {"class": "hourDeparture"})
             dep_arr = dep_arr.find_all("td")[0]
             dep_arr = dep_arr.text.split(">", 1)
-            
+
             @listify
             def iterate():
                 now = datetime.datetime.now()
@@ -329,14 +329,14 @@ class Itinerary(object):
                     line1 = [i["alt"] for i in line.find_all("img", recursive = False)]
                     line2 = [i.text.strip() for i in line.find_all("div")]
                     line = line1 + line2
-                    
+
                     line_detail = detail_table.find_all("td")[1]
                     line_detail = line_detail.find("p")
                     line_detail = line_detail.text.strip()
                     line_detail = line_detail.split("\n")
 
                     line_info = " ".join([i.strip() for i in line_detail[:-1]])
-                    
+
                     if line_detail[-1].strip().startswith("Direction"):
                         direction = line_detail[-1].strip()[len("Direction"):].strip()
 
@@ -491,7 +491,7 @@ def main():
     print "*** Steps"
     for i, step in enumerate(itinerary):
         print "%d." % (i + 1),
-        
+
         if step.type != "step":
             print "%s:" % (step.type.capitalize(), ),
 
@@ -499,7 +499,7 @@ def main():
 
         if step.type == "arrival":
             continue
-        
+
         if step.walk_duration is not None or step.wait_duration is not None:
             print " - Walk duration: %s" % (step.walk_duration, )
             print " - Wait duration: %s" % (step.wait_duration, )
