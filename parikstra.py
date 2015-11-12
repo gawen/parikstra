@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 __author__ = "Gawen Arab"
 __copyright__ = "Copyright 2012, Gawen Arab"
@@ -12,12 +12,22 @@ __status__ = "Production"
 import bs4
 import requests
 import json
-import urlparse
 import urllib
 import datetime
 import time
 import functools
 import sys
+
+# Quick patch to have the same code for Python 2 & 3
+if sys.version_info.major == 2:
+    from urllib import quote as urllib_quote
+    from urlparse import urljoin
+
+else:
+    from urllib.parse import quote as urllib_quote
+    from urllib.parse import urljoin as urljoin
+
+    basestring = (str, bytes)
 
 def listify(f):
     @functools.wraps(f)
@@ -52,7 +62,7 @@ class Point(object):
         self = super(Point, cls).__new__(cls)
 
         o.pop("search", None)
-        for k, v in o.iteritems():
+        for k, v in o.items():
             setattr(self, k, v)
 
         return self
@@ -62,7 +72,7 @@ class Point(object):
 
     @classmethod
     def search(self, word):
-        url = "searchPoints/" + urllib.quote(word)
+        url = "searchPoints/" + urllib_quote(word)
         req = API._rest_req(url)
         req = json.loads(req.text)
 
@@ -93,7 +103,7 @@ class Point(object):
 
             @dictify
             def transform():
-                for k, v in ret.iteritems():
+                for k, v in ret.items():
                     k = prefix + (k[0].upper() + k[1:] if k else "")
 
                     yield (k, v)
@@ -278,9 +288,9 @@ class Itinerary(object):
             it = iter(steps)
 
             while True:
-                head = it.next()
+                head = next(it)
                 try:
-                    details = it.next()
+                    details = next(it)
 
                 except StopIteration:
                     details = None
@@ -378,7 +388,7 @@ class Step(object):
     def __init__(self, **kwargs):
         super(Step, self).__init__()
 
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             setattr(self, "_" + k, v)
 
     @property
@@ -425,7 +435,7 @@ class API(object):
                 "verbose": sys.stderr,
             }
 
-        return requests.get(urlparse.urljoin("http://www.vianavigo.com/stif_web_carto/rest/", path), **kwargs)
+        return requests.get(urljoin("http://www.vianavigo.com/stif_web_carto/rest/", path), **kwargs)
 
     @staticmethod
     def _parse_duration(d):
@@ -464,15 +474,16 @@ def main():
     itineraries = Point(departure).to(arrival)
 
     for i, itinerary in enumerate(itineraries):
-        print "*** Itinerary #%d (%s => %s)" % (i + 1, itinerary.departure, itinerary.arrival, )
-        print " - Type: %s" % (itinerary.type, )
-        print " - Duration: %s" % (itinerary.duration, )
-        print " - Zones: %s" % (itinerary.zone, )
-        print
+        print("*** Itinerary #%d (%s => %s)" % (i + 1, itinerary.departure,
+            itinerary.arrival, ))
+        print(" - Type: %s" % (itinerary.type, ))
+        print(" - Duration: %s" % (itinerary.duration, ))
+        print(" - Zones: %s" % (itinerary.zone, ))
+        print("")
 
     itinerary = None
     while not itinerary:
-        i = raw_input("Which one (1-%s) ? " % (len(itineraries), ))
+        i = input("Which one (1-%s) ? " % (len(itineraries), ))
         i = int(i) - 1
 
         try:
@@ -482,32 +493,32 @@ def main():
             itinerary = itineraries[i]
 
         except IndexError:
-            print "ERROR: bad index value"
-            print
+            print("ERROR: bad index value")
+            print("")
 
-    print "*" * 80
-    print "Itinerary %s" % (itinerary.type, )
+    print("*" * 80)
+    print("Itinerary %s" % (itinerary.type, ))
 
-    print "*** Steps"
+    print("*** Steps")
     for i, step in enumerate(itinerary):
-        print "%d." % (i + 1),
+        sys.stdout.write("%d. " % (i + 1))
 
         if step.type != "step":
-            print "%s:" % (step.type.capitalize(), ),
+            sys.stdout.write("%s: " % (step.type.capitalize(), ))
 
-        print "%s => %s @ %s" % (step.name, step.direction, step.time, )
+        print("%s => %s @ %s" % (step.name, step.direction, step.time, ))
 
         if step.type == "arrival":
             continue
 
         if step.walk_duration is not None or step.wait_duration is not None:
-            print " - Walk duration: %s" % (step.walk_duration, )
-            print " - Wait duration: %s" % (step.wait_duration, )
+            print(" - Walk duration: %s" % (step.walk_duration, ))
+            print(" - Wait duration: %s" % (step.wait_duration, ))
 
         else:
-            print " - Line: %s" % (step._line_info, )
+            print(" - Line: %s" % (step._line_info, ))
 
-        print
+        print("")
 
 if __name__ == "__main__":
     main()
